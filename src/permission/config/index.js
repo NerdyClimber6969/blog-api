@@ -1,14 +1,9 @@
 const resources = require('./resources');
 const routes = require('./routes');
+const actions = require('./actions');
 
 module.exports = {
     resources,
     routes,
-    actions: {
-        CREATE: 'create',
-        READ: 'read',
-        UPDATE: 'update',
-        DELETE: 'delete',
-        LIST: 'list'
-    }
+    actions
 };

@@ -1,5 +1,5 @@
 const { user } = require('../../prisma/prismaClient');
-const { CREATE, READ, UPDATE, DELETE, LIST } = require('./actions');
+const { CREATE, READ, UPDATE, DELETE, LIST, LOGOUT } = require('./actions');
 
 module.exports = {
     posts: {
@@ -60,4 +60,12 @@ module.exports = {
             )
         }
     },
+    logout: {
+        admin: {
+            [LOGOUT]: true
+        },
+        user: {
+            [LOGOUT]: true
+        },
+    }
 };

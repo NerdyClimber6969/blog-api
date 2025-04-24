@@ -1,7 +1,6 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const JwtStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
 const UserService = require('./services/UserService.js');
 const AuthenService = require('./services/AuthenService.js');
 const AuthError = require('./errors/AuthError.js');
@@ -26,10 +25,19 @@ passport.use(
     })
 );
 
+function cookieExtractor(req) {
+    let token = null;
+    if (req && req.cookies) {
+        token = req.cookies.accessToken;
+    };
+
+    return token;
+};
+
 passport.use(
     new JwtStrategy(
         {
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: cookieExtractor,
             secretOrKey: process.env.SECRET,
         }, 
         (user, done) => {

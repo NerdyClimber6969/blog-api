@@ -48,12 +48,48 @@ const login = [
     localAuthen,
     (req, res, next) => {
         const { id, username, role } = req.user;
-        const token = AuthenService.generateToken(id, username, role, process.env.SECRET);
+        const accessToken = AuthenService.generateToken(id, username, role, process.env.SECRET);
+        const accessTokenExpiry = JSON.parse(atob(accessToken.split('.')[1])).exp;
+
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            path: '/'
+        });
+        res.cookie('accessTokenExpiry', accessTokenExpiry, {
+            httpOnly: false,
+            path: '/'
+        });
+        res.cookie('username', username, {
+            httpOnly: false,
+            path: '/'
+        });
+
         return res.status(201).json({      
             success: true,
-            token,
+            accessToken,
         });
     }
 ];
 
-module.exports = { register, login };
+function logout(req, res, next) {
+    res.clearCookie('accessToken', {
+        httpOnly: true,
+        path: '/'
+    });
+
+    res.clearCookie('accessTokenExpiry', {
+        httpOnly: true,
+        path: '/'
+    });
+
+    res.clearCookie('username', {
+            httpOnly: false,
+            path: '/'
+    });
+
+    return res.status(200).json({      
+        success: true,
+    });
+};
+
+module.exports = { register, login, logout };
