@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const { localAuthen } = require('../middlewares/authenMiddlewares.js');
 const AuthenService = require('../services/AuthenService.js');
 const UserService = require('../services/UserService.js');
+const AuthError = require('../errors/AuthError.js');
 
 const validateUserData = [
     body('firstName').trim()
@@ -49,23 +50,15 @@ const login = [
     (req, res, next) => {
         const { id, username, role } = req.user;
         const accessToken = AuthenService.generateToken(id, username, role, process.env.SECRET);
-        const accessTokenExpiry = JSON.parse(atob(accessToken.split('.')[1])).exp;
 
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             path: '/'
         });
-        res.cookie('accessTokenExpiry', accessTokenExpiry, {
-            httpOnly: false,
-            path: '/'
-        });
-        res.cookie('username', username, {
-            httpOnly: false,
-            path: '/'
-        });
 
         return res.status(201).json({      
             success: true,
+            username: username,
         });
     }
 ];
@@ -76,19 +69,25 @@ function logout(req, res, next) {
         path: '/'
     });
 
-    res.clearCookie('accessTokenExpiry', {
-        httpOnly: true,
-        path: '/'
-    });
-
-    res.clearCookie('username', {
-            httpOnly: false,
-            path: '/'
-    });
-
     return res.status(200).json({      
         success: true,
+        username: req.user.username
     });
 };
 
-module.exports = { register, login, logout };
+function verifyStatus(req, res, next) {
+    const timeNow = Math.floor(Date.now() / 1000);
+
+    if (req.user.exp <= timeNow) {
+        const error = new AuthError('Token expired' , 401);
+        return next(error);
+    };
+
+    return res.json({
+        success: true,
+        isAuthenticated: true,
+        username: req.user.username
+    });
+};
+
+module.exports = { register, login, logout, verifyStatus };

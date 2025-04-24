@@ -25,7 +25,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(['/posts', '/comments', '/profiles', '/authen'], jwtAuthen);
+app.use(['/posts', '/comments', '/profiles'], jwtAuthen);
 
 app.use('/authen', authenRouter);
 app.use('/posts', postRouter);
