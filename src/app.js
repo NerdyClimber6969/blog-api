@@ -2,13 +2,13 @@ require('dotenv').config();
 const path = require('node:path'); 
 const express = require('express');
 const cors = require('cors')
-const authController = require('./controllers/authController.js');
+const cookieParser = require('cookie-parser')
 const { jwtAuthen } = require('./middlewares/authenMiddlewares.js');
+const authenRouter = require('./routes/authenRouter.js');
 const postRouter = require('./routes/postRouter.js');
 const commentRouter = require('./routes/commentRouter.js');
 const profileRouter = require('./routes/profileRouter.js');
 const { handleError } = require('./middlewares/errorMiddlewares.js');
-const cookieParser = require('cookie-parser')
 
 PORT = 3000
 const app = express();
@@ -25,13 +25,9 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(['/posts', '/comments', '/profiles', '/logout'], jwtAuthen);
+app.use(['/posts', '/comments', '/profiles', '/authen'], jwtAuthen);
 
-app.post('/sign-up', authController.register);
-app.post('/login', authController.login);
-app.post('/logout', authController.logout);
-
-// post route (i.e. /post/:postId)
+app.use('/authen', authenRouter);
 app.use('/posts', postRouter);
 app.use('/comments', commentRouter)
 app.use('/profiles', profileRouter);

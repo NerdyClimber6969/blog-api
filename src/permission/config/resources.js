@@ -59,13 +59,5 @@ module.exports = {
                 post.newStatus !== 'banned'
             )
         }
-    },
-    logout: {
-        admin: {
-            [LOGOUT]: true
-        },
-        user: {
-            [LOGOUT]: true
-        },
     }
 };

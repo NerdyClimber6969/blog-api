@@ -66,7 +66,6 @@ const login = [
 
         return res.status(201).json({      
             success: true,
-            accessToken,
         });
     }
 ];
