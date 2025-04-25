@@ -15,7 +15,7 @@ class AuthenService {
         const token = jwt.sign(
             { id, username, role }, 
             secretKey, 
-            { expiresIn: '1h'}
+            { expiresIn: '1h' }
         );
 
         return token;

@@ -79,13 +79,13 @@ function verifyStatus(req, res, next) {
     const timeNow = Math.floor(Date.now() / 1000);
 
     if (req.user.exp <= timeNow) {
-        const error = new AuthError('Token expired' , 401);
-        return next(error);
+        return next(new AuthError('Expired token', 403));
     };
 
-    return res.json({
+    return res.status(200).json({
         success: true,
         isAuthenticated: true,
+        expired: false,
         username: req.user.username
     });
 };

@@ -19,7 +19,7 @@ authenRouter.use((req, res, next) => {
 
         const accessToken = jwt.verify(req.cookies.accessToken, process.env.SECRET, { ignoreExpiration: true });
         if (!accessToken) {
-            return next(new AuthError('Invalid token or please login before continue', 403));
+            return next(new AuthError('Invalid token', 403));
         };
 
         req.user = accessToken;
