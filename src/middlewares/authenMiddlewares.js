@@ -1,5 +1,5 @@
 const passport = require('../passport.js');
-const AuthError = require('../errors/AuthError.js');
+const { AuthenticationError } = require('../errors/Error.js');
 
 module.exports.localAuthen = passport.authenticate('local', { session: false });
 
@@ -15,7 +15,7 @@ module.exports.jwtAuthen = (req, res, next) => {
                 };
 
                 if (user.exp < Math.floor(Date.now() / 1000)) {
-                    throw new AuthError('Session expired');
+                    throw new AuthenticationError('Token passed its expiration time', 'token expired');
                 } else {
                     req.user = user;
                     return next();

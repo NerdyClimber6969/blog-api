@@ -3,19 +3,19 @@ const LocalStrategy = require('passport-local').Strategy;
 const JwtStrategy = require('passport-jwt').Strategy;
 const UserService = require('./services/UserService.js');
 const AuthenService = require('./services/AuthenService.js');
-const AuthError = require('./errors/AuthError.js');
+const { AuthenticationError } = require('./errors/Error.js');
 
 passport.use(
     new LocalStrategy(async (username, password, done) => {
         try {
             const user = await UserService.getUserByUsername(username);
             if (!user) {
-                throw new AuthError(`Incorrect username or password`);
+                throw new AuthenticationError('Incorrect username or password', 'invalid credential');
             };
     
             const match = await AuthenService.verifyPassword(password, user.hash);
             if (!match) {
-                throw new AuthError('Incorrect username or password');
+                throw new AuthenticationError('Incorrect username or password', 'invalid credential');
             };
             
             done(null, user);

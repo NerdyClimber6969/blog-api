@@ -1,28 +1,26 @@
-function handleError (error, req, res, next) {
-    console.error(error);
+function handleError(error, req, res, next) {
+    console.error(error)
 
-    const baseErrorJson = { success: false };
+    // Handle non-operational errors (unexpected errors)
     if (!error.isOperational) {
         return res.status(500).json({
-            ...baseErrorJson,
-            errors: [
-                {
-                    message: 'Unexpected internal server error occured',
-                    type: 'unexpected error',
-                }
-            ]
+            success: false,
+            error: {
+                name: 'UnexpectedError',
+                message: 'Unexpected internal server error occurred',
+                statusCode: 500,
+                timeStamp: new Date().toISOString(),
+            }
         });
     };
+    
+    // Build the error response object
+    const errorResponse = {
+        success: false,
+        error: error.toJSON()
+    };
 
-    return res.status(error.statusCode).json({ 
-        ...baseErrorJson,
-        errors: [
-            {
-                message: error.message, 
-                type: error.type
-            }
-        ]
-    });
+    return res.status(error.statusCode).json(errorResponse);
 };
 
 module.exports = { handleError };

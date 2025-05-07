@@ -1,6 +1,6 @@
 const bcryptjs = require('bcryptjs');
 const prisma = require("../prisma/prismaClient.js");
-const ServiceError = require('../errors/ServiceError.js');
+const { AuthenticationError } = require('../errors/Error.js');
 
 class UserService {
     static async getUserProfileById(userId) {
@@ -55,13 +55,17 @@ class UserService {
 
     static async createUser({ username, firstName, lastName, password, role='User'}) {
         if (!['User', 'Admin'].includes(role)) {
-            throw new TypeError('Undifined role, only "User" or "Admin:" allowed!');
+            throw new TypeError('Undifined role, only "User" or "Admin" allowed!');
         };
 
         // Check if user already exists
         const existingUser = await UserService.getUserByUsername(username);
         if (existingUser) {
-            throw new ServiceError(`User "${username}" already existed, please use another username`);
+            throw new AuthenticationError(
+                'This username is already in use. Please choose a different username', 
+                'user existed',
+                409
+            );
         };
 
         const hash = await bcryptjs.hash(password, 10);

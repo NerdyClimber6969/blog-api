@@ -3,7 +3,9 @@ const { body, validationResult } = require('express-validator');
 const { localAuthen } = require('../middlewares/authenMiddlewares.js');
 const AuthenService = require('../services/AuthenService.js');
 const UserService = require('../services/UserService.js');
-const AuthError = require('../errors/AuthError.js');
+const { AuthenticationError } = require('../errors/Error.js');
+const { ValidationError } = require('../errors/Error.js');
+const jwt = require('jsonwebtoken');
 
 const validateUserData = [
     body('firstName').trim()
@@ -30,10 +32,7 @@ const register = [
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ 
-                success: false,
-                errors: errors.array()
-            });
+            throw new ValidationError('Invalid inputs', errors.array());
         };
 
         const { id, username, role } = await UserService.createUser(req.body);
@@ -71,22 +70,37 @@ function logout(req, res, next) {
 
     return res.status(200).json({      
         success: true,
-        username: req.user.username
     });
 };
 
 function verifyStatus(req, res, next) {
+    if (!req.cookies.accessToken) {
+        return next(new AuthenticationError('No token was provided', 'token missing'));
+    };
+
+    const accessToken = jwt.verify(req.cookies.accessToken, process.env.SECRET, { ignoreExpiration: true });
+    if (!accessToken) {
+        return next(new AuthenticationError('Signature verification failed', 'invalid token'));
+    };
+
     const timeNow = Math.floor(Date.now() / 1000);
 
-    if (req.user.exp <= timeNow) {
-        return next(new AuthError('Expired token', 403));
+    if (accessToken.exp <= timeNow) {
+        return next(new AuthenticationError('Token passed its expiration time', 'token expired'));
     };
+
+    res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store',
+    });
 
     return res.status(200).json({
         success: true,
         isAuthenticated: true,
         expired: false,
-        username: req.user.username
+        username: accessToken.username
     });
 };
 

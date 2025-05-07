@@ -1,5 +1,5 @@
 const config = require('./config');
-const AuthError = require('../errors/AuthError.js');
+const { AccessDeniedError }= require('../errors/Error.js');
 
 class PermissionEvaluator {
     #config;
@@ -14,35 +14,67 @@ class PermissionEvaluator {
     can(resourceType, user, action, resource, context = {}) {
         // Default role if not specified
         const role = user?.role || 'visitor';
-    
+        
+        const baseResult = {
+            role: role,
+            resourceType,
+            requiredPermissions: action,
+        };
+
         // Get resource config
         const resourceConfig = this.#config.resources[resourceType];
         if (!resourceConfig) {
-            return false;
+            return {
+                ...baseResult,
+                granted: false,
+                userPermissions: null,
+                reason: 'Resource not found'
+            };
         };
     
         // Get role-specific permissions for this resource
         const rolePermissions = resourceConfig[role];
             if (!rolePermissions) {
-            return false;
+            return {
+                ...baseResult,
+                granted: false,
+                userPermissions: null,
+                reason: 'Role not allowed for this resource or not defined'
+            };
         };
     
         // Get the specific permission rule
         const permissionRule = rolePermissions[action];
-    
+        const userPermissions = Object.keys(rolePermissions);
         // If no specific rule, check for default rule
         if (permissionRule === undefined) {
-            return false;
+            return {
+                ...baseResult,
+                granted: false,
+                userPermissions,
+                reason: 'Action not allowed for this role or not defined'
+            };
         };
     
         // If boolean permission
         if (typeof permissionRule === 'boolean') {
-            return permissionRule;
+            return {
+                ...baseResult,
+                granted: permissionRule,
+                userPermissions,
+                reason: permissionRule ? 'Explicit allow' : 'Explicit deny'
+            };
         };
     
         // If function permission
         if (typeof permissionRule === 'function') {
-            return permissionRule(user, resource, context);
+            const granted = permissionRule(user, resource, context);
+            return {
+                ...baseResult,
+                granted,
+                userPermissions,
+                reason: granted ? 'Conditional allow' : 'Conditional deny'
+            };
         };
     
         return false;
@@ -85,11 +117,11 @@ class PermissionSystem {
         };
         
         const result = this.#evaluator.can(resource, user, action, data, context);
-        if (!result) {
-            throw new AuthError('Permission denied', 403);
+        if (!result.granted) {
+            throw new AccessDeniedError('You cannot access this resource', result);
         };
     
-        return true;
+        return result.granted;
     };
   
     /**
@@ -100,8 +132,9 @@ class PermissionSystem {
         if (!this.#evaluator) {
             throw new Error('Permission system not initialized');
         };
-    
-        return this.#evaluator.can(resource, user, action, data, context);
+        
+        const result = this.#evaluator.can(resource, user, action, data, context);
+        return result.granted;
     };
   
     /**

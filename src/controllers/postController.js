@@ -87,11 +87,7 @@ module.exports.createComment = asyncHandler(async(req, res, next) => {
     
     return res.status(201).json({
         success: true,
-        comment: {
-            id: comment.id,
-            content: comment.content,
-            createdAt: comment.createdAt
-        },
+        comment: comment,
     });
 });
 

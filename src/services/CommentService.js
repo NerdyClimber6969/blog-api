@@ -1,5 +1,5 @@
 const prisma = require("../prisma/prismaClient.js");
-const ServiceError = require('../errors/ServiceError.js');
+const { ResourceNotFoundError } = require('../errors/Error.js');
 
 class CommentService {
     static async createComment(content, postId, userId) {
@@ -11,7 +11,15 @@ class CommentService {
             data: {
                 content: content,
                 postId: postId,
-                authorId: userId
+                authorId: userId,
+            },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        username: true
+                    }
+                }
             }
         });
 
@@ -28,7 +36,7 @@ class CommentService {
         });
 
         if (!comment) {
-            throw new ServiceError('Comment not found', 404);
+            throw new ResourceNotFoundError('Comment not found', 'comments', commentId);
         };
 
         return comment;
@@ -54,7 +62,7 @@ class CommentService {
         });
 
         if (!comments) {
-            throw new ServiceError('No comment found', 404);
+            throw new ResourceNotFoundError('No comment found in this post', 'comments', postId);
         };
 
         return comments;
@@ -82,7 +90,7 @@ class CommentService {
         });
 
         if (!comment) {
-            throw new ServiceError('Comment not found', 404);
+            throw new ResourceNotFoundError('Comment not found', 'comments', commentId);
         };
 
         return comment;

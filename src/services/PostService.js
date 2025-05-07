@@ -1,5 +1,5 @@
 const prisma = require("../prisma/prismaClient.js");
-const ServiceError = require('../errors/ServiceError.js');
+const { ResourceNotFoundError } = require('../errors/Error.js');
 
 class PostService {
     static async getPostsList(userId, publishedOnly=true) {
@@ -59,7 +59,7 @@ class PostService {
         });
 
         if (!post) {
-            throw new ServiceError('Post not found', 404);
+            throw new ResourceNotFoundError('Post not found', 'posts', postId);
         };
 
         return post;
@@ -85,7 +85,7 @@ class PostService {
         });
 
         if (!post) {
-            throw new ServiceError('Post not found', 404);
+            throw new ResourceNotFoundError('Post not found', 'posts', postId);
         };
         
         return post;
@@ -116,12 +116,16 @@ class PostService {
         };
 
         const post = await prisma.post.findUnique({
-            where: { id: postId,},
-            omit: { id: true }
+            where: { id: postId },
+            include: {
+                author: {
+                    select: { username: true }
+                }
+            }
         });
 
         if (!post) {
-            throw new ServiceError('Post not found', 404);
+            throw new ResourceNotFoundError('Post not found', 'posts', postId);
         };
 
         return post;
@@ -137,7 +141,7 @@ class PostService {
         });
 
         if (!post) {
-            throw new ServiceError('Post not found', 404);
+            throw new ResourceNotFoundError('Post not found', 'posts', postId);
         };
 
         return post;
