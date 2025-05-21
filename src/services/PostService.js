@@ -1,43 +1,40 @@
-const prisma = require("../prisma/prismaClient.js");
+const prisma = require('../prisma/prismaClient.js');
+const QueryConditionBuilder = require('../utils/QueryConditionBuilder.js');
 const { ResourceNotFoundError } = require('../errors/Error.js');
 
+const queryConditionBuilder = new QueryConditionBuilder(Object.keys(prisma.post.fields));
+
 class PostService {
-    static async getPostsList(userId, publishedOnly=true) {
-        if (typeof userId === 'boolean') {
-            publishedOnly = userId;
-            userId = null;
-        };
-        userId = userId || null;
+    static async getPostsMetaData({ filter = {}, sorting = {}, pagination = {} }) {
+        const { orderBy='createdAt', orderDir='desc' } = sorting;
+        const conditions = queryConditionBuilder.buildConditions({ filter, sorting:{ orderBy, orderDir }, pagination } );
+        const { processedFilter, processedSorting, processedPagination } = conditions;
 
-        if (userId && typeof userId !== 'string') {
-            throw new TypeError('userId must be a string of uuid');
-        };
-
-        const filterCondition = {}
-        if (userId) {
-            filterCondition.authorId = userId;
-        };
-
-        if (publishedOnly) {
-            filterCondition.status = 'published';
-        };
-
-        const postList = await prisma.post.findMany({
-            where: { ...filterCondition },
-            select: {
-                id: true,
-                title: true,
-                summary: true,
-                createdAt: true,
-                author: {
-                    select: {
-                        username: true
+        const [total, posts] = await prisma.$transaction([
+            prisma.post.count({ where: processedFilter }),
+            prisma.post.findMany({
+                where: processedFilter,
+                ...processedPagination,
+                include: {
+                    author: {
+                        select: {
+                            username: true
+                        }
                     }
-                }
-            }
-        });
+                },
+                omit: {
+                    content: true
+                },
+                orderBy: processedSorting
+            })
+        ]);
 
-        return postList;
+        const totalPages = processedPagination ? Math.ceil(total / processedPagination.take) : 1;
+        
+        return { 
+            totalPages: totalPages, 
+            posts 
+        };
     };
 
     static async updatePostStatus(postId, status) {
@@ -110,7 +107,7 @@ class PostService {
         return post;
     };
 
-    static async getPost(postId) {
+    static async getPostById(postId) {
         if (!postId || typeof postId !== 'string') {
             throw new TypeError('postId is required and must be a string of uuid');
         };

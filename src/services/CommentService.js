@@ -1,5 +1,8 @@
 const prisma = require("../prisma/prismaClient.js");
+const QueryConditionBuilder = require('../utils/QueryConditionBuilder.js');
 const { ResourceNotFoundError } = require('../errors/Error.js');
+
+const queryConditionBuilder = new QueryConditionBuilder(Object.keys(prisma.comment.fields));
 
 class CommentService {
     static async createComment(content, postId, userId) {
@@ -26,7 +29,37 @@ class CommentService {
         return comment;
     };
 
-    static async getComment(commentId) {
+    static async getComments({ filter = {}, sorting = {}, pagination = {} }) {
+        const { orderBy='createdAt', orderDir='desc' } = sorting;
+        const conditions = queryConditionBuilder.buildConditions({ filter, sorting:{ orderBy, orderDir }, pagination });
+        const { processedFilter, processedSorting, processedPagination } = conditions;
+
+        const [total, comments] = await prisma.$transaction([
+            prisma.comment.count({ where: processedFilter }),
+            prisma.comment.findMany({
+                where: processedFilter,
+                ...processedPagination,
+                orderBy: processedSorting,
+                include: {
+                    post: {
+                        select : {
+                            title: true,
+                            author: { select: { username: true } }
+                        }
+                    },                    
+                }
+            })
+        ]);
+
+        const totalPages = processedPagination ? Math.ceil(total / processedPagination.take) : 1;
+        
+        return { 
+            totalPages, 
+            comments
+        };
+    };
+
+    static async getCommentById(commentId) {
         if (!commentId || typeof commentId !== 'string') {
             throw new TypeError('comment id is required and must be a string of uuid');
         };
@@ -42,33 +75,7 @@ class CommentService {
         return comment;
     }
 
-    static async getCommentsByPostId(postId) {
-        if (!postId || typeof postId !== 'string') {
-            throw new TypeError('post id is required and must be a string of uuid');
-        };
-
-        const comments = await prisma.comment.findMany({
-            where: {
-                postId: postId
-            },
-            include: {
-                author: {
-                    select: {
-                        id: true,
-                        username: true
-                    }
-                }
-            }
-        });
-
-        if (!comments) {
-            throw new ResourceNotFoundError('No comment found in this post', 'comments', postId);
-        };
-
-        return comments;
-    };
-
-    static async deleteComment(commentId) {
+    static async deleteCommentById(commentId) {
         if (!commentId || typeof commentId !== 'string') {
             throw new TypeError('comment id is required and must be a string of uuid');
         };

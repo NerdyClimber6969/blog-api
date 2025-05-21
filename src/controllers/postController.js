@@ -2,12 +2,19 @@ const asyncHandler = require('express-async-handler');
 const PostService = require('../services/PostService.js');
 const CommentService = require('../services/CommentService.js');
 
-module.exports.getPostsList = asyncHandler(async(req, res, next) => {
-    const postsList = await PostService.getPostsList(true);
+module.exports.getPostsMetaData = asyncHandler(async(req, res, next) => {
+    const { orderBy, orderDir, page, pageSize, ...filter } = req.query;
 
-    return res.json({
+    filter.status = 'exact:published' ;
+    const sorting = { orderBy, orderDir };
+    const pagination = { page, pageSize };
+
+    const { totalPages, posts } = await PostService.getPostsMetaData({ filter, sorting, pagination });
+
+    return res.status(200).json({
         success: true,
-        posts: postsList,
+        totalPages,
+        posts
     });
 });
 
@@ -49,12 +56,10 @@ module.exports.updatedPostStatus = asyncHandler(async(req, res, next) => {
     });
 });
 
-module.exports.getPostContent = asyncHandler(async(req, res, next) => {
-    const comments = await CommentService.getCommentsByPostId(req.params.postId);
+module.exports.getPostById = asyncHandler(async(req, res, next) => {
     return res.status(200).json({
         success: true,
         post: req.data,
-        comments: comments,
     });
 });
 

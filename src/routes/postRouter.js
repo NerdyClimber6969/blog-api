@@ -12,8 +12,7 @@ postRouter.use(['/:postId', '/:postId/comments', '/:postId/status'], asyncHandle
     if (!req.params?.postId) {
         return next();
     };
-
-    const post = await PostService.getPost(req.params.postId);
+    const post = await PostService.getPostById(req.params.postId)
     req.data = post;
 
     return next();
@@ -28,7 +27,7 @@ postRouter.delete('/:postId', hasPermission, postController.deletePost);
 
 postRouter.patch('/:postId/status', hasPermission, postController.updatedPostStatus);
 
-postRouter.get('/', hasPermission, postController.getPostsList);
-postRouter.get('/:postId', hasPermission, postController.getPostContent);
+postRouter.get('/', hasPermission, postController.getPostsMetaData);
+postRouter.get('/:postId', hasPermission, postController.getPostById);
 
 module.exports = postRouter;

@@ -9,7 +9,7 @@ function handleError(error, req, res, next) {
                 name: 'UnexpectedError',
                 message: 'Unexpected internal server error occurred',
                 statusCode: 500,
-                timeStamp: new Date().toISOString(),
+                timestamp: new Date().toISOString(),
             }
         });
     };

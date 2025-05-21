@@ -11,11 +11,12 @@ commentRouter.use('/:commentId', asyncHandler(async(req, res, next) => {
         return next();
     };
 
-    const comment = await CommentService.getComment(req.params.commentId);
+    const comment = await CommentService.getCommentById(req.params.commentId);
     req.data = comment;
     return next();
 }));
 
-commentRouter.delete('/:commentId', permissionSystem.createMiddleware(), commentController.deleteComment)
+commentRouter.delete('/:commentId', permissionSystem.createMiddleware(), commentController.deleteCommentById)
+commentRouter.get('/', commentController.getComments);
 
 module.exports = commentRouter;
