@@ -1,20 +1,13 @@
 const prisma = require('../prisma/prismaClient.js');
-const QueryConditionBuilder = require('../utils/QueryConditionBuilder.js');
 const { ResourceNotFoundError } = require('../errors/Error.js');
-
-const queryConditionBuilder = new QueryConditionBuilder(Object.keys(prisma.post.fields));
 
 class PostService {
     static async getPostsMetaData({ filter = {}, sorting = {}, pagination = {} }) {
-        const { orderBy='createdAt', orderDir='desc' } = sorting;
-        const conditions = queryConditionBuilder.buildConditions({ filter, sorting:{ orderBy, orderDir }, pagination } );
-        const { processedFilter, processedSorting, processedPagination } = conditions;
-
         const [total, posts] = await prisma.$transaction([
-            prisma.post.count({ where: processedFilter }),
+            prisma.post.count({ where: filter }),
             prisma.post.findMany({
-                where: processedFilter,
-                ...processedPagination,
+                where: filter,
+                ...pagination,
                 include: {
                     author: {
                         select: {
@@ -25,11 +18,11 @@ class PostService {
                 omit: {
                     content: true
                 },
-                orderBy: processedSorting
+                orderBy: sorting
             })
         ]);
 
-        const totalPages = processedPagination ? Math.ceil(total / processedPagination.take) : 1;
+        const totalPages = sorting.take ? Math.ceil(total / sorting.take) : 1;
         
         return { 
             totalPages: totalPages, 
@@ -62,15 +55,7 @@ class PostService {
         return post;
     };
 
-    static async updatePost(postId, title, content) {
-        if (
-            typeof postId !== 'string' ||
-            typeof title !== 'string' ||
-            typeof content !== 'string'
-        ) {
-            throw new TypeError('postId, title and content must be string');
-        };
-
+    static async updatePost(postId, title, content, status) {
         const post = prisma.post.update({
             where: {
                 id: postId
@@ -78,6 +63,7 @@ class PostService {
             data: {
                 title,
                 content,
+                status,
             }
         });
 

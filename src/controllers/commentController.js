@@ -13,12 +13,13 @@ module.exports.deleteCommentById = asyncHandler(async(req, res, next) => {
 });
 
 module.exports.getComments = asyncHandler(async (req, res, next) => {
-    const { orderBy, orderDir, page, pageSize, ...filter } = req.query;
+    const { processedFilter, processedSorting, processedPagination } = req.queryOption;
 
-    const sorting = { orderBy, orderDir };
-    const pagination = { page, pageSize };
-
-    const { totalPages, comments } = await CommentService.getComments({ filter, sorting, pagination });
+    const { totalPages, comments } = await CommentService.getComments({ 
+        filter: processedFilter, 
+        sorting: processedSorting, 
+        pagination: processedPagination
+    });
 
     res.status(200).json({
         success: true,

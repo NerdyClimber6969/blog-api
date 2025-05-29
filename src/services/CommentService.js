@@ -1,8 +1,5 @@
 const prisma = require("../prisma/prismaClient.js");
-const QueryConditionBuilder = require('../utils/QueryConditionBuilder.js');
 const { ResourceNotFoundError } = require('../errors/Error.js');
-
-const queryConditionBuilder = new QueryConditionBuilder(Object.keys(prisma.comment.fields));
 
 class CommentService {
     static async createComment(content, postId, userId) {
@@ -30,16 +27,12 @@ class CommentService {
     };
 
     static async getComments({ filter = {}, sorting = {}, pagination = {} }) {
-        const { orderBy='createdAt', orderDir='desc' } = sorting;
-        const conditions = queryConditionBuilder.buildConditions({ filter, sorting:{ orderBy, orderDir }, pagination });
-        const { processedFilter, processedSorting, processedPagination } = conditions;
-
         const [total, comments] = await prisma.$transaction([
-            prisma.comment.count({ where: processedFilter }),
+            prisma.comment.count({ where: filter }),
             prisma.comment.findMany({
-                where: processedFilter,
-                ...processedPagination,
-                orderBy: processedSorting,
+                where: filter,
+                ...pagination,
+                orderBy: sorting,
                 include: {
                     post: {
                         select : {
@@ -51,7 +44,7 @@ class CommentService {
             })
         ]);
 
-        const totalPages = processedPagination ? Math.ceil(total / processedPagination.take) : 1;
+        const totalPages = sorting.take ? Math.ceil(total / sorting.take ) : 1;
         
         return { 
             totalPages, 
