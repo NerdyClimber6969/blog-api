@@ -1,19 +1,31 @@
 const { Router } = require('express');
-const asyncHandler = require('express-async-handler');
-const permissionSystem = require('../permission/permissionSystem.js')
-const UserService = require('../services/UserService.js');
+const checkPermission = require('../middlewares/permissionMiddlewares');
+const { getProfilePostsMetaData, getProfileComments, getSummary } = require('../controllers/profilesController.js');
+const { createValidationMiddleware } = require('../middlewares/validationMiddlewares/validationMiddlewares.js');
+const { baseQueryParamsChain } = require('../middlewares/validationMiddlewares/validationChains.js');
+const createQueryOptionMiddleware = require('../middlewares/queryOptionMiddleware');
 
 const profileRouter = Router();
 
-profileRouter.use(permissionSystem.createMiddleware());
+const validateQueryParams = createValidationMiddleware(baseQueryParamsChain);
 
-profileRouter.get('/', asyncHandler(async(req, res, next) => {
-    const profile = await UserService.getUserProfileById(req.user.id);
+const buildPostQueryOption = createQueryOptionMiddleware({ 
+    title: (req) => req.query?.search, 
+    authorId: (req) => `exact:${req.user.id}` 
+})
 
-    return res.json({
-        success: true,
-        profile: profile,
-    });
-}));
+const buildCommentQueryOption = createQueryOptionMiddleware({ 
+    content: (req) => req.query?.search, 
+    authorId: (req) => `exact:${req.user.id}` 
+})
+
+const attachContext = (req, res, next) => {
+    req.context = { view: 'profile' };
+    next();
+};
+
+profileRouter.get('/comments', validateQueryParams, attachContext, checkPermission, buildCommentQueryOption, getProfileComments);
+profileRouter.get('/posts', validateQueryParams, attachContext, checkPermission, buildPostQueryOption, getProfilePostsMetaData);
+profileRouter.get('/summary', checkPermission, getSummary)
 
 module.exports = profileRouter;
