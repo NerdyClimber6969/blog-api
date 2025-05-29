@@ -30,8 +30,8 @@ class AppError extends Error {
 };
 
 class ValidationError extends AppError {
-    constructor(message, invalidFields=[], statusCode=400) {
-        super(message, statusCode, { invalidFields });
+    constructor(message, details, statusCode=400) {
+        super(message, statusCode, details);
     };
 };
 
@@ -43,8 +43,12 @@ class AuthenticationError extends AppError {
 
 
 class AccessDeniedError extends AppError {
-    constructor(message, { role, resourceType, resourceId, userPermissions, requiredPermission }, statusCode=403) {
-        super(message, statusCode, { role, resourceType, resourceId, userPermissions, requiredPermission });
+    constructor(
+        message, 
+        { role, resourceType, resourceId, userPermissions, requiredPermission, reason }, 
+        statusCode=403
+    ) {
+        super(message, statusCode, { role, resourceType, resourceId, userPermissions, requiredPermission, reason });
     };
 };
   
