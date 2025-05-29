@@ -1,5 +1,4 @@
-const { user } = require('../../prisma/prismaClient');
-const { CREATE, READ, UPDATE, DELETE, LIST, LOGOUT } = require('./actions');
+const { CREATE, READ, UPDATE, DELETE, LIST } = require('./actions');
 
 module.exports = {
     posts: {
@@ -18,7 +17,8 @@ module.exports = {
             ),
             [UPDATE]: (user, post) => (
                 user.id === post.authorId &&    
-                post.status !== 'banned'
+                post.status !== 'banned' && 
+                post.newStatus !== 'banned'
             ),
             [DELETE]: (user, post) => (
                 user.id === post.authorId && 
@@ -28,7 +28,7 @@ module.exports = {
         },
         visitor: {
             [READ]: (user, post) => (post.status === 'published'),
-            [LIST]: true
+            [LIST]: (user, post, context) => (context.view === 'public')
         }
     },
     comments: {
@@ -38,26 +38,19 @@ module.exports = {
         },
         user: {
             [CREATE]: (user, post) => (user.role === 'user' && post.status === 'published'),
-            [DELETE]: (user, comment) => (user.id === comment.authorId) 
+            [DELETE]: (user, comment) => (user.id === comment.authorId),
+            [LIST]: true
+        },
+        visitor: {
+            [LIST]: (user, comment, context) => (context.view === 'public')
         }
     },
-    profiles: {
+    summary: {
         admin: {
             [READ]: true
         },
         user: {
             [READ]: true
-        }
-    },
-    status: {
-        admin: {
-            [UPDATE]: true
-        },
-        user: {
-            [UPDATE]: (user, post) => (
-                user.id === post.authorId && 
-                post.newStatus !== 'banned'
-            )
         }
     }
 };

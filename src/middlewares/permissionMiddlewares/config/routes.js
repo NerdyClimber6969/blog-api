@@ -50,17 +50,31 @@ module.exports = [
         action: DELETE,
         dataExtractor: req => req.data
     },
-    { 
-        route: '/posts/:postId/status', 
-        method: 'PATCH', 
-        resource: 'status', 
-        action: UPDATE,
+    {
+        route: '/comments',
+        method: 'GET',
+        resource:'comments',
+        action: LIST,
         dataExtractor: req => req.data
     },
     { 
-        route: '/profiles', 
+        route: '/profiles/posts', 
         method: 'GET', 
-        resource: 'profiles', 
+        resource: 'posts', 
+        action: LIST,
+        dataExtractor: req => req.data 
+    },
+    { 
+        route: '/profiles/comments', 
+        method: 'GET', 
+        resource: 'comments', 
+        action: LIST,
+        dataExtractor: req => req.data 
+    },
+    { 
+        route: '/profiles/summary', 
+        method: 'GET', 
+        resource: 'summary', 
         action: READ,
         dataExtractor: req => req.data 
     }

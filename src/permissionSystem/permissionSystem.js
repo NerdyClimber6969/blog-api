@@ -1,5 +1,4 @@
-const config = require('./config');
-const { AccessDeniedError }= require('../errors/Error.js');
+const { AccessDeniedError } = require('../errors/Error.js');
 
 class PermissionEvaluator {
     #config;
@@ -11,7 +10,7 @@ class PermissionEvaluator {
     /**
     * Check if a user has permission to perform an action on a resource
     */
-    can(resourceType, user, action, resource, context = {}) {
+    can(resourceType, user, action, data, context = {}) {
         // Default role if not specified
         const role = user?.role || 'visitor';
         
@@ -68,7 +67,7 @@ class PermissionEvaluator {
     
         // If function permission
         if (typeof permissionRule === 'function') {
-            const granted = permissionRule(user, resource, context);
+            const granted = permissionRule(user, data, context);
             return {
                 ...baseResult,
                 granted,
@@ -76,8 +75,13 @@ class PermissionEvaluator {
                 reason: granted ? 'Conditional allow' : 'Conditional deny'
             };
         };
-    
-        return false;
+
+        return {
+            ...baseResult,
+            granted: false,
+            userPermissions,
+            reason: 'Invalid permission rule'
+        };
     };
 };
 
@@ -120,7 +124,7 @@ class PermissionSystem {
         if (!result.granted) {
             throw new AccessDeniedError('You cannot access this resource', result);
         };
-    
+        
         return result.granted;
     };
   
@@ -154,7 +158,7 @@ class PermissionSystem {
                 const match = routeMap.find(mapping => 
                     mapping.method === req.method && mapping.route === fullPath
                 );
-                
+
                 if (!match) {
                     return next();
                 };
@@ -167,7 +171,8 @@ class PermissionSystem {
                     ip: req.ip,
                     headers: req.headers,
                     params: req.params,
-                    query: req.query
+                    query: req.query,
+                    ...req.context
                 };
                 
                 // Check permission
@@ -182,6 +187,5 @@ class PermissionSystem {
     };
 };
 
-// Create and export singleton instance
-const permissionSystem = new PermissionSystem().initialize(config);
-module.exports = permissionSystem;
+
+module.exports = PermissionSystem;
