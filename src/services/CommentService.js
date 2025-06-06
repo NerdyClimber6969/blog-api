@@ -44,10 +44,9 @@ class CommentService {
             })
         ]);
 
-        const totalPages = sorting.take ? Math.ceil(total / sorting.take ) : 1;
         
         return { 
-            totalPages, 
+            total, 
             comments
         };
     };

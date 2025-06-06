@@ -15,7 +15,7 @@ module.exports.deleteCommentById = asyncHandler(async(req, res, next) => {
 module.exports.getComments = asyncHandler(async (req, res, next) => {
     const { processedFilter, processedSorting, processedPagination } = req.queryOption;
 
-    const { totalPages, comments } = await CommentService.getComments({ 
+    const { total, comments } = await CommentService.getComments({ 
         filter: processedFilter, 
         sorting: processedSorting, 
         pagination: processedPagination
@@ -23,7 +23,7 @@ module.exports.getComments = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        totalPages,
+        total,
         comments
     });
 });

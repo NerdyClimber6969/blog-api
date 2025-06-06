@@ -6,15 +6,15 @@ const UserService = require('../services/UserService.js');
 module.exports.getProfilePostsMetaData = asyncHandler(async(req, res, next) => {
     const { processedFilter, processedSorting, processedPagination } = req.queryOption;
 
-    const { totalPages, posts } = await PostService.getPostsMetaData({ 
+    const { total, posts } = await PostService.getPostsMetaData({ 
         filter: processedFilter, 
         sorting: processedSorting, 
         pagination: processedPagination 
     });
-
+    
     return res.status(200).json({
         success: true,
-        totalPages,
+        total,
         posts
     });
 })
@@ -22,7 +22,7 @@ module.exports.getProfilePostsMetaData = asyncHandler(async(req, res, next) => {
 module.exports.getProfileComments = asyncHandler(async(req, res, next) => {
     const { processedFilter, processedSorting, processedPagination } = req.queryOption;
 
-    const { totalPages, comments } = await CommentService.getComments({ 
+    const { total, comments } = await CommentService.getComments({ 
         filter: processedFilter, 
         sorting: processedSorting, 
         pagination: processedPagination 
@@ -30,7 +30,7 @@ module.exports.getProfileComments = asyncHandler(async(req, res, next) => {
 
     res.status(200).json({
         success: true,
-        totalPages,
+        total,
         comments
     });
 })

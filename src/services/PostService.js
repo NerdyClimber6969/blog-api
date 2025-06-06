@@ -21,48 +21,22 @@ class PostService {
                 orderBy: sorting
             })
         ]);
-
-        const totalPages = sorting.take ? Math.ceil(total / sorting.take) : 1;
         
         return { 
-            totalPages: totalPages, 
+            total,
             posts 
         };
     };
 
-    static async updatePostStatus(postId, status) {
-        if (typeof status !== 'string') {
-            throw new TypeError('Status must be string');
-        };
-
-        if (!['drafted', 'published', 'archived', 'banned'].includes(status)) {
-            throw new TypeError('Undefined post status');
-        };
-        
-        const post = prisma.post.update({
-            where: {
-                id: postId
-            },
-            data: {
-                status
-            }
-        });
-
-        if (!post) {
-            throw new ResourceNotFoundError('Post not found', 'posts', postId);
-        };
-
-        return post;
-    };
-
-    static async updatePost(postId, title, content, status) {
-        const post = prisma.post.update({
+    static async updatePost(postId, title, content, summary, status) {
+        const post = await prisma.post.update({
             where: {
                 id: postId
             },
             data: {
                 title,
                 content,
+                summary,
                 status,
             }
         });
@@ -75,7 +49,7 @@ class PostService {
     };
 
     static async createPost(title, content=null, userId) {
-        const post = prisma.post.create({
+        const post = await prisma.post.create({
             data: {
                 title: title,
                 content: content,

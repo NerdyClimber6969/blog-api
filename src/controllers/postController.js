@@ -5,7 +5,7 @@ const CommentService = require('../services/CommentService.js');
 module.exports.getPostsMetaData = asyncHandler(async(req, res, next) => {
     const { processedFilter, processedSorting, processedPagination } = req.queryOption;
 
-    const { totalPages, posts } = await PostService.getPostsMetaData({ 
+    const { total, posts } = await PostService.getPostsMetaData({ 
         filter: processedFilter, 
         sorting: processedSorting, 
         pagination: processedPagination
@@ -13,16 +13,16 @@ module.exports.getPostsMetaData = asyncHandler(async(req, res, next) => {
 
     return res.status(200).json({
         success: true,
-        totalPages,
+        total,
         posts
     });
 });
 
 module.exports.updatePost = asyncHandler(async(req, res, next) => {
     const { postId } = req.params;
-    const { title, content, status } = req.body;
+    const { title, content, summary, status } = req.body;
     
-    const post = await PostService.updatePost(postId, title, content, status);
+    const post = await PostService.updatePost(postId, title, content, summary, status);
 
     res.status(200).json({
         success: true,
@@ -32,7 +32,8 @@ module.exports.updatePost = asyncHandler(async(req, res, next) => {
             title: post.title,
             content: post.content,
             status: post.status,
-            updatedAt: post.updatedAt
+            updatedAt: post.updatedAt,
+            summary: post.summary,
         }
     });
 });
