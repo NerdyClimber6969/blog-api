@@ -4,10 +4,11 @@ const AuthenService = require('../services/AuthenService.js');
 const UserService = require('../services/UserService.js');
 const { AuthenticationError } = require('../errors/Error.js');
 const jwt = require('jsonwebtoken');
-const { signUpChain: validateSignUpData } = require('../middlewares/validationMiddlewares/validationChains.js');
+const { signUpChain } = require('../middlewares/validationMiddlewares/validationChains.js');
+const { createValidationMiddleware } = require('../middlewares/validationMiddlewares/validationMiddlewares.js');
 
 const register = [
-    validateSignUpData,
+    createValidationMiddleware(signUpChain),
     asyncHandler(async(req, res, next) => {
         const { id, username, role } = await UserService.createUser(req.body);
 
