@@ -21,9 +21,12 @@ const signUpChain = [
 ];
 
 const postUpdateChain =  [
-    body('status').optional().trim()
+    body('title').optional().trim(),
+    body('summary').optional().trim(),
+    body('content').optional().trim(),
+    body('status').optional().trim().toLowerCase()
         .isString().withMessage('status must be a string')
-        .isIn(['drafted', 'published', 'archived', 'banned']).withMessage('status can only be drafted, published, archived or banned')
+        .isIn(['drafted', 'published', 'archived', 'banned']).withMessage('status can only be drafted, published, archived or banned'), 
 ];
 
 const baseQueryParamsChain = [ 
@@ -42,4 +45,3 @@ const baseQueryParamsChain = [
 ];
 
 module.exports = { signUpChain, postUpdateChain, baseQueryParamsChain };
-
