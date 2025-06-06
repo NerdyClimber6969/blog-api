@@ -4,10 +4,10 @@ const asyncHandler = require('express-async-handler');
 const postController = require('../controllers/postController.js');
 const checkPermission = require('../middlewares/permissionMiddlewares');
 const { createValidationMiddleware } = require('../middlewares/validationMiddlewares/validationMiddlewares.js');
-const { baseQueryParamsChain, postUpdateChain } = require('../middlewares/validationMiddlewares/validationChains.js');
+const { postQueryChain, postUpdateChain } = require('../middlewares/validationMiddlewares/validationChains.js');
 const createQueryOptionMiddleware = require('../middlewares/queryOptionMiddleware');
 
-const validateQueryParams = createValidationMiddleware(baseQueryParamsChain);
+const validateQueryParams = createValidationMiddleware(postQueryChain);
 const validatePostUpdate = createValidationMiddleware(postUpdateChain);
 
 const buildPostQueryOption = createQueryOptionMiddleware({ 

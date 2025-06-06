@@ -30,9 +30,6 @@ const postUpdateChain =  [
 ];
 
 const baseQueryParamsChain = [ 
-    query('orderBy').optional().trim()
-        .isString().withMessage('orderBy must be string')
-        .isIn(['createdAt', 'updatedAt', 'like', 'dislike']).withMessage('invalid query value'),
     query('orderDir').optional().trim()
         .isString().withMessage('orderDir must be string')
         .isIn(['asc', 'desc']).withMessage('orderDir can only be asc and desc'),
@@ -44,4 +41,31 @@ const baseQueryParamsChain = [
         .isString().withMessage('search must be an string'),
 ];
 
-module.exports = { signUpChain, postUpdateChain, baseQueryParamsChain };
+const postQueryChain = [
+    query('orderBy').optional().trim()
+        .isString().withMessage('orderBy must be string')
+        .isIn(['createdAt', 'updatedAt', 'like', 'dislike', 'title']).withMessage('invalid query value'),
+    ...baseQueryParamsChain
+];
+
+const profilePostQueryChain = [
+    query('status').optional().trim().toLowerCase()
+        .isString().withMessage('status must be a string')
+        .isIn(['drafted', 'published', 'archived', 'banned']).withMessage('status can only be drafted, published, archived or banned'),
+    ...postQueryChain
+];
+
+const profileCommentQueryChain = [
+    query('orderBy').optional().trim()
+        .isString().withMessage('orderBy must be string')
+        .isIn(['createdAt', 'updatedAt', 'like', 'dislike', 'content']).withMessage('invalid query value'),
+    ...baseQueryParamsChain
+];
+
+const commentQueryChain = [
+    query('postId').optional().trim()
+        .isString().withMessage('postId must be string'),
+    ...baseQueryParamsChain
+];
+
+module.exports = { signUpChain, postUpdateChain, postQueryChain, commentQueryChain, profilePostQueryChain, profileCommentQueryChain };

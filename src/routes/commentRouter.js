@@ -4,13 +4,15 @@ const asyncHandler = require('express-async-handler');
 const commentController = require('../controllers/commentController.js');
 const checkPermission = require('../middlewares/permissionMiddlewares');
 const { createValidationMiddleware } = require('../middlewares/validationMiddlewares/validationMiddlewares.js');
-const { baseQueryParamsChain } = require('../middlewares/validationMiddlewares/validationChains.js');
+const { commentQueryChain } = require('../middlewares/validationMiddlewares/validationChains.js');
 const createQueryOptionMiddleware = require('../middlewares/queryOptionMiddleware');
 const commentRouter = Router();
 
-const validateQueryParams = createValidationMiddleware(baseQueryParamsChain);
-
-const buildCommentQueryOption = createQueryOptionMiddleware({ content: (req) => req.query?.search })
+const validateCommentQueryParams = createValidationMiddleware(commentQueryChain);
+const buildCommentQueryOption = createQueryOptionMiddleware({ 
+    content: (req) => req.query?.search,
+    postId: (req) => req.query?.postId
+})
 
 commentRouter.use('/:commentId', asyncHandler(async(req, res, next) => {
     if (!req.params?.commentId) {
@@ -25,7 +27,7 @@ commentRouter.use('/:commentId', asyncHandler(async(req, res, next) => {
 commentRouter.delete('/:commentId', checkPermission, commentController.deleteCommentById)
 
 commentRouter.get('/', 
-    validateQueryParams, 
+    validateCommentQueryParams, 
     (req, res, next) => { req.context = { view: 'public' }; next(); },
     checkPermission,
     buildCommentQueryOption,
