@@ -28,7 +28,7 @@ commentRouter.delete('/:commentId', checkPermission, commentController.deleteCom
 
 commentRouter.get('/', 
     validateCommentQueryParams, 
-    (req, res, next) => { req.context = { view: 'public' }; next(); },
+    (req, res, next) => { req.permissionContext = { view: 'public' }; next(); },
     checkPermission,
     buildCommentQueryOption,
     commentController.getComments

@@ -22,7 +22,7 @@ const buildCommentQueryOption = createQueryOptionMiddleware({
 })
 
 const attachContext = (req, res, next) => {
-    req.context = { view: 'profile' };
+    req.permissionContext = { view: 'profile' };
     next();
 };
 

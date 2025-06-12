@@ -13,12 +13,14 @@ class PermissionEvaluator {
     can(resourceType, user, action, data, context = {}) {
         // Default role if not specified
         const role = user?.role || 'visitor';
-        
+
         const baseResult = {
             role: role,
             resourceType,
-            requiredPermissions: action,
+            // resourceId: data?.id,
+            requiredPermission: action,
         };
+        data && data.id && ( baseResult.resourceId = data.id )
 
         // Get resource config
         const resourceConfig = this.#config.resources[resourceType];
@@ -121,6 +123,7 @@ class PermissionSystem {
         };
         
         const result = this.#evaluator.can(resource, user, action, data, context);
+
         if (!result.granted) {
             throw new AccessDeniedError('You cannot access this resource', result);
         };
@@ -172,7 +175,7 @@ class PermissionSystem {
                     headers: req.headers,
                     params: req.params,
                     query: req.query,
-                    ...req.context
+                    ...req.permissionContext
                 };
                 
                 // Check permission

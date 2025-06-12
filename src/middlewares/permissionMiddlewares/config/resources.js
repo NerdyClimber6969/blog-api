@@ -15,10 +15,10 @@ module.exports = {
                 (user.id === post.authorId || post.status === 'published') &&
                 post.status !== 'banned'
             ),
-            [UPDATE]: (user, post) => (
+            [UPDATE]: (user, post, context) => (
                 user.id === post.authorId &&    
                 post.status !== 'banned' && 
-                post.newStatus !== 'banned'
+                context.newStatus !== 'banned'
             ),
             [DELETE]: (user, post) => (
                 user.id === post.authorId && 

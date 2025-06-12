@@ -34,7 +34,7 @@ postRouter.post('/', checkPermission, postController.createPost);
 postRouter.post('/:postId/comments', checkPermission, postController.createComment); 
 
 postRouter.patch('/:postId', 
-    (req, res, next) => { req.data.newStatus = req.body?.status; next() },
+    (req, res, next) => { req.permissionContext = { newStatus: req.body?.status }; next() },
     validatePostUpdate,
     checkPermission, 
     postController.updatePost
@@ -43,7 +43,7 @@ postRouter.patch('/:postId',
 postRouter.delete('/:postId', checkPermission, postController.deletePost);
 
 postRouter.get('/', 
-    (req, res, next) => { req.context = { view: 'public' }; next() }, 
+    (req, res, next) => { req.permissionContext = { view: 'public' }; next() }, 
     validateQueryParams, 
     checkPermission, 
     buildPostQueryOption,
@@ -51,7 +51,7 @@ postRouter.get('/',
 );
 
 postRouter.get('/:postId', 
-    (req, res, next) => { req.context = { view: 'public' }; next() }, 
+    (req, res, next) => { req.permissionContext = { view: 'public' }; next() }, 
     checkPermission, 
     postController.getPostById
 );
