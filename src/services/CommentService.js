@@ -14,15 +14,15 @@ class CommentService {
                 authorId: userId,
             },
             include: {
-                author: {
-                    select: {
-                        id: true,
-                        username: true
+                post: {
+                    select : {
+                        title: true,
+                        author: { select: { username: true } }
                     }
-                }
+                },                    
             }
         });
-
+        console.log(comment)
         return comment;
     };
 
