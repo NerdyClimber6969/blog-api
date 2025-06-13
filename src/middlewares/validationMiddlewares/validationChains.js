@@ -65,7 +65,7 @@ const profileCommentQueryChain = [
 const commentQueryChain = [
     query('postId').optional().trim()
         .isString().withMessage('postId must be string'),
-    ...baseQueryParamsChain
+    ...profileCommentQueryChain
 ];
 
 module.exports = { signUpChain, postUpdateChain, postQueryChain, commentQueryChain, profilePostQueryChain, profileCommentQueryChain };
