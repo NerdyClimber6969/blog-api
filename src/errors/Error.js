@@ -55,7 +55,8 @@ class AccessDeniedError extends AppError {
 
 class ResourceNotFoundError extends AppError {
     constructor(message, resourceType, resourceId, statusCode=404) {
-        super(message, statusCode, { resourceType, resourceId });
+        const details = !resourceType && !resourceId ? null : { resourceType, resourceId } ;
+        super(message, statusCode, details);
     };
 };
 

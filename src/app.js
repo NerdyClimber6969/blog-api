@@ -9,12 +9,15 @@ const postRouter = require('./routes/postRouter.js');
 const commentRouter = require('./routes/commentRouter.js');
 const profileRouter = require('./routes/profileRouter.js');
 const { handleError } = require('./middlewares/errorMiddlewares.js');
+const { ResourceNotFoundError } = require('./errors/Error.js');
 
-PORT = 3000
 const app = express();
 
 const corsOptions = {
-    origin: ['http://localhost:3001', 'http://localhost:3002'],
+    origin: [
+        process.env.BLOG_STUDIO_URL || 'http://localhost:3001', 
+        process.env.BLOG_APP_URL || 'http://localhost:3002',
+    ],
     allowedHeaders: ['Content-Type', 'Authorization'],
     optionsSuccessStatus: 200,
     credentials: true
@@ -36,10 +39,13 @@ app.use('/profiles', profileRouter);
 app.use(handleError);
 
 app.use((req, res, next) => {
+    const notFoundError = new ResourceNotFoundError('Requested resouce not found')
+
     res.status(404).json({
         success: false,
-        errors: [{ message: "Sorry can't find the resource!" }]
-    })
+        errors: notFoundError.toJSON()
+    });
 });
 
-app.listen(PORT, () => console.log(`now listening on PORT ${PORT}!`));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Current NODE_ENV is set to ${process.env.NODE_ENV} and now listening on PORT ${PORT}!`));

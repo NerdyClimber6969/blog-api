@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "npx prisma migrate dev",
     "migrate:create": "npx prisma migrate dev --create-only",
-    "generate": "npx prisma generate"
+    "generate": "npx prisma generate",
+    "dev": "NODE_ENV=development node --watch src/app.js",
+    "stage": "NODE_ENV=staging node src/app.js"
   },
   "keywords": [],
   "author": "",

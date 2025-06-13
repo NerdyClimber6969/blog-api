@@ -25,10 +25,16 @@ const login = [
         const { id, username, role } = req.user;
         const accessToken = AuthenService.generateToken(id, username, role, process.env.SECRET);
 
-        res.cookie('accessToken', accessToken, {
+        const cookieOption = {
             httpOnly: true,
-            path: '/'
-        });
+            domain: process.env.COOKIE_DOMAIN || 'localhost',
+            secure: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging',
+            path: '/',
+            maxAge: 1000 * 60 * 60,
+        };
+        (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging') && (cookieOption.sameSite = 'None');
+
+        res.cookie('accessToken', accessToken, cookieOption);
 
         return res.status(201).json({      
             success: true,

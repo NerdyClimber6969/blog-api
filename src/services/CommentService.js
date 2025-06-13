@@ -22,7 +22,7 @@ class CommentService {
                 },                    
             }
         });
-        console.log(comment)
+
         return comment;
     };
 
