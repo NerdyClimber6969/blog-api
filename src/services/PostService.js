@@ -67,13 +67,14 @@ class PostService {
         return post;
     };
 
-    static async getPostById(postId) {
+    static async getPostById(postId, publishedOnly=true) {
         if (!postId || typeof postId !== 'string') {
             throw new TypeError('postId is required and must be a string of uuid');
         };
 
+        const filter = publishedOnly ? { id: postId, status: 'published' } : { id: postId };
         const post = await prisma.post.findUnique({
-            where: { id: postId },
+            where: filter,
             include: {
                 author: {
                     select: { username: true }

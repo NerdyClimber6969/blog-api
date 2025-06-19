@@ -1,6 +1,5 @@
 const asyncHandler = require('express-async-handler');
 const PostService = require('../services/PostService.js');
-const CommentService = require('../services/CommentService.js');
 
 module.exports.getPostsMetaData = asyncHandler(async(req, res, next) => {
     const { processedFilter, processedSorting, processedPagination } = req.queryOption;
@@ -15,6 +14,16 @@ module.exports.getPostsMetaData = asyncHandler(async(req, res, next) => {
         success: true,
         total,
         posts
+    });
+});
+
+module.exports.getPublishedPost = asyncHandler(async(req, res, next) => {
+    const { postId } = req.params;
+    const post = await PostService.getPostById(postId, true);
+
+    return res.status(200).json({
+        success: true,
+        post: post,
     });
 });
 
@@ -38,14 +47,6 @@ module.exports.updatePost = asyncHandler(async(req, res, next) => {
     });
 });
 
-module.exports.getPostById = asyncHandler(async(req, res, next) => {
-    return res.status(200).json({
-        success: true,
-        post: req.data,
-    });
-});
-
-
 module.exports.createPost = asyncHandler(async(req, res, next) => {
     const { title, content } = req.body;
     const post = await PostService.createPost(title, content,  req.user.id);
@@ -65,16 +66,3 @@ module.exports.deletePost = asyncHandler(async(req, res, next) => {
         post: post
     });
 });
-
-module.exports.createComment = asyncHandler(async(req, res, next) => {
-    const { postId } = req.params;
-    const { content } = req.body;
-
-    const comment = await CommentService.createComment(content, postId, req.user.id);
-    
-    return res.status(201).json({
-        success: true,
-        comment: comment,
-    });
-});
-

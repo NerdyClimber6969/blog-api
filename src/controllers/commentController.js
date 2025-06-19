@@ -12,6 +12,18 @@ module.exports.deleteCommentById = asyncHandler(async(req, res, next) => {
     });
 });
 
+module.exports.createComment = asyncHandler(async(req, res, next) => {
+    const { postId } = req.params;
+    const { content } = req.body;
+
+    const comment = await CommentService.createComment(content, postId, req.user.id);
+    
+    return res.status(201).json({
+        success: true,
+        comment: comment,
+    });
+});
+
 module.exports.getComments = asyncHandler(async (req, res, next) => {
     const { processedFilter, processedSorting, processedPagination } = req.queryOption;
 
