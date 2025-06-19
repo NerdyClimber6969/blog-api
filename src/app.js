@@ -6,8 +6,7 @@ const cookieParser = require('cookie-parser')
 const { jwtAuthen } = require('./middlewares/authenMiddlewares.js');
 const authenRouter = require('./routes/authenRouter.js');
 const postRouter = require('./routes/postRouter.js');
-const commentRouter = require('./routes/commentRouter.js');
-const profileRouter = require('./routes/profileRouter.js');
+const usersRouter = require('./routes/usersRouter.js');
 const { handleError } = require('./middlewares/errorMiddlewares.js');
 const { ResourceNotFoundError } = require('./errors/Error.js');
 
@@ -28,12 +27,12 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(['/posts', '/comments', '/profiles'], jwtAuthen);
 
 app.use('/authen', authenRouter);
+
+app.use(['/posts', '/users'], jwtAuthen);
 app.use('/posts', postRouter);
-app.use('/comments', commentRouter)
-app.use('/profiles', profileRouter);
+app.use('/users', usersRouter);
 
 // error handling middlewares
 app.use(handleError);

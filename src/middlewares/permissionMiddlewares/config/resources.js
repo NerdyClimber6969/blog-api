@@ -11,23 +11,13 @@ module.exports = {
         },
         user: {
             [CREATE]: true,
-            [READ]: (user, post) => (
-                (user.id === post.authorId || post.status === 'published') &&
-                post.status !== 'banned'
-            ),
-            [UPDATE]: (user, post, context) => (
-                user.id === post.authorId &&    
-                post.status !== 'banned' && 
-                context.newStatus !== 'banned'
-            ),
-            [DELETE]: (user, post) => (
-                user.id === post.authorId && 
-                post.status !== 'banned'
-            ),
+            [READ]: (user, post, context) => ((context.view === 'profile' && user.id === post.authorId) || (post.status === 'published' && context.view === 'public')),
+            [UPDATE]: (user, post, context) => (user.id === post.authorId && context.newStatus !== 'banned'),
+            [DELETE]: (user, post) => (user.id === post.authorId),
             [LIST]: true
         },
         visitor: {
-            [READ]: (user, post) => (post.status === 'published'),
+            [READ]: (user, post, context) => (post.status === 'published' && context.view === 'public'),
             [LIST]: (user, post, context) => (context.view === 'public')
         }
     },
@@ -39,7 +29,7 @@ module.exports = {
         user: {
             [CREATE]: (user, post) => (user.role === 'user' && post.status === 'published'),
             [DELETE]: (user, comment) => (user.id === comment.authorId),
-            [LIST]: true
+            [LIST]: (user, post, context) => ((context.view === 'profile' && user.id === post.authorId) || (post.status === 'published' && context.view === 'public'))
         },
         visitor: {
             [LIST]: (user, comment, context) => (context.view === 'public')

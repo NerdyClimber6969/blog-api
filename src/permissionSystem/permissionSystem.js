@@ -175,7 +175,11 @@ class PermissionSystem {
                     headers: req.headers,
                     params: req.params,
                     query: req.query,
-                    ...req.permissionContext
+                };
+                
+                // Extract the route context and attach it to context if existed
+                if (match.contextAttacher && typeof match.contextAttacher ==='function') {
+                    match.contextAttacher(req, context);
                 };
                 
                 // Check permission

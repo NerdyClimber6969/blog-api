@@ -1,59 +1,30 @@
 const { Router } = require('express');
-const PostService = require('../services/PostService.js');
-const asyncHandler = require('express-async-handler');
-const postController = require('../controllers/postController.js');
-const checkPermission = require('../middlewares/permissionMiddlewares');
+const { getPostsMetaData, getPublishedPost } = require('../controllers/postController.js');
+const { getComments } = require('../controllers/commentController.js');
+
 const { createValidationMiddleware } = require('../middlewares/validationMiddlewares/validationMiddlewares.js');
-const { postQueryChain, postUpdateChain } = require('../middlewares/validationMiddlewares/validationChains.js');
+const { postQueryChain, commentQueryChain } = require('../middlewares/validationMiddlewares/validationChains.js');
 const createQueryOptionMiddleware = require('../middlewares/queryOptionMiddleware');
 
 const validateQueryParams = createValidationMiddleware(postQueryChain);
-const validatePostUpdate = createValidationMiddleware(postUpdateChain);
+const validateCommentQueryParams = createValidationMiddleware(commentQueryChain);
+
+const { loadPost } = require('../middlewares/loaderMiddlewares.js');
+const checkPermission = require('../middlewares/permissionMiddlewares');
 
 const buildPostQueryOption = createQueryOptionMiddleware({ 
     status: () => 'exact:published', 
     title: (req) => req.query?.search 
-})
+});
+const buildCommentQueryOption = createQueryOptionMiddleware({ 
+    content: (req) => req.query?.search,
+    postId: (req) => req.query?.postId,
+});
 
 const postRouter = Router();
 
-postRouter.use(['/:postId', '/:postId/comments'], asyncHandler(async(req, res, next) => {
-    if (!req.params?.postId) {
-        return next();
-    };
-
-    const post = await PostService.getPostById(req.params.postId);
-    req.data = post;
-
-    return next();
-}));
-
-
-postRouter.post('/', checkPermission, postController.createPost); 
-
-postRouter.post('/:postId/comments', checkPermission, postController.createComment); 
-
-postRouter.patch('/:postId', 
-    (req, res, next) => { req.permissionContext = { newStatus: req.body?.status }; next() },
-    validatePostUpdate,
-    checkPermission, 
-    postController.updatePost
-);
-
-postRouter.delete('/:postId', checkPermission, postController.deletePost);
-
-postRouter.get('/', 
-    (req, res, next) => { req.permissionContext = { view: 'public' }; next() }, 
-    validateQueryParams, 
-    checkPermission, 
-    buildPostQueryOption,
-    postController.getPostsMetaData
-);
-
-postRouter.get('/:postId', 
-    (req, res, next) => { req.permissionContext = { view: 'public' }; next() }, 
-    checkPermission, 
-    postController.getPostById
-);
+postRouter.get('/', validateQueryParams, buildPostQueryOption, getPostsMetaData);
+postRouter.get('/:postId', getPublishedPost);
+postRouter.get('/:postId/comments', validateCommentQueryParams, loadPost, checkPermission, buildCommentQueryOption, getComments);
 
 module.exports = postRouter;
