@@ -1,7 +1,6 @@
 const bcryptjs = require('bcryptjs');
 const prisma = require("../prisma/prismaClient.js");
 const { AuthenticationError } = require('../errors/Error.js');
-const { ResourceNotFoundError } = require('../errors/Error.js');
 
 class UserService {
     static async getSummary(userId) {
@@ -31,8 +30,18 @@ class UserService {
             ) AS t
             GROUP BY user_id;
         `
+        
         if (!summary) {
-            throw new ResourceNotFoundError("user's summary not found", 'profiles', userId);
+            return {
+                user_id: userId,
+                published_posts: 0,
+                drafted_posts: 0,
+                comments: 0,
+                post_likes: 0,
+                post_dislikes: 0,
+                comment_likes: 0,
+                comment_dislikes: 0
+            };
         };
 
         for (const key in summary) {
