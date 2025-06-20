@@ -9,22 +9,20 @@ const createQueryOptionMiddleware = require('../middlewares/queryOptionMiddlewar
 const validateQueryParams = createValidationMiddleware(postQueryChain);
 const validateCommentQueryParams = createValidationMiddleware(commentQueryChain);
 
-const { loadPost } = require('../middlewares/loaderMiddlewares.js');
-const checkPermission = require('../middlewares/permissionMiddlewares');
-
 const buildPostQueryOption = createQueryOptionMiddleware({ 
     status: () => 'exact:published', 
     title: (req) => req.query?.search 
 });
 const buildCommentQueryOption = createQueryOptionMiddleware({ 
     content: (req) => req.query?.search,
-    postId: (req) => req.query?.postId,
+    postId: (req) => req.params?.postId,
+    post: () => ({ status: 'exact:published' }),
 });
 
 const postRouter = Router();
 
-postRouter.get('/', validateQueryParams, buildPostQueryOption, getPostsMetaData);
-postRouter.get('/:postId', getPublishedPost);
-postRouter.get('/:postId/comments', validateCommentQueryParams, loadPost, checkPermission, buildCommentQueryOption, getComments);
+postRouter.get('/', validateQueryParams, buildPostQueryOption, getPostsMetaData); 
+postRouter.get('/:postId', getPublishedPost); 
+postRouter.get('/:postId/comments', validateCommentQueryParams, buildCommentQueryOption, getComments);
 
 module.exports = postRouter;

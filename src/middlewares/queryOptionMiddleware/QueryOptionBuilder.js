@@ -1,44 +1,15 @@
-const { FilterHandler } = require('./FilterHandler')
-
-/**
- * Builds a chain of filtering criteria handlers, 
- * each handler in the chain decides either to process the request 
- * or to pass it along the chain to the next handler.
- * @class 
- */
-class FilterHandlerChain {
-    /**
-    * @type {FilterHandler[]}
-    * @private
-    */
-    #filterHandlers
-
-    /**
-    * Creates an instance of FilterHandlerChain
-    * @param {FilterHandler[]} filterHandlers - Array of FilterHandler
-    */
-    constructor(filterHandlers=[]) {
-        this.#filterHandlers = filterHandlers;
-        return;
-    };
-
-    addHandler(handler) {
-        this.#filterHandlers.push(handler);
-        console.log(handler);
-        return this;
-    };
-
-    handle(key, value) {
-        const handler = this.#filterHandlers.find(h => h.canHandle(key, value));
-        return handler ? handler.handle(key, value) : null;
-    };
-};
-
+const  FilterHandler  = require('./FilterHandler')
 /**
  * Builds query conditions for filtering, sorting, and pagination
  * @class QueryConditionBuilder
  */
 class QueryOptionBuilder {
+    /**
+    * @type {FilterHandler[]}
+    * @private
+    */
+    #chain
+
     /**
     * Creates an instance of QueryConditionBuilder
     * @param {FilterHandler[]} filterHandlers - Array of filter handler
@@ -53,13 +24,7 @@ class QueryOptionBuilder {
             throw new TypeError('filterHandlers must not be an empty array');;
         };
 
-        for (const handler of filterHandlers) {
-            if (!(handler instanceof FilterHandler)) {
-                throw new TypeError('Must pass handler to the handler chain');
-            };
-        };        
-
-        this.filterHandlerChain = new FilterHandlerChain(filterHandlers);
+        this.#chain = filterHandlers
     };
 
     buildFilter(filter) {
@@ -67,7 +32,8 @@ class QueryOptionBuilder {
 
         Object.entries(filter).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
-                const handledResult = this.filterHandlerChain.handle(key, value);
+                const handler = this.#chain.find(h => h.canHandle(key, value));
+                const handledResult = handler ? handler.handle(key, value) : null
 
                 if (handledResult) {
                     Object.assign(whereClause, handledResult);

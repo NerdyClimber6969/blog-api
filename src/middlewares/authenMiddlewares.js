@@ -10,12 +10,11 @@ module.exports.jwtAuthen = (req, res, next) => {
         (err, user, info) => {
             try {
                 if (!user) {
-                    req.user = { role: 'visitor' };
-                    return next();
+                    throw new AuthenticationError('You are not authenticated to access this resource', info.message);
                 };
 
                 if (user.exp < Math.floor(Date.now() / 1000)) {
-                    throw new AuthenticationError('Token passed its expiration time', 'token expired');
+                    throw new AuthenticationError('Token passed its expiration time', 'Token expired');
                 } else {
                     req.user = user;
                     return next();

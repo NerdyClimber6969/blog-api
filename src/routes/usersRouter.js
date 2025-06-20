@@ -7,6 +7,8 @@ const { createValidationMiddleware } = require('../middlewares/validationMiddlew
 const { profilePostQueryChain, profileCommentQueryChain, postUpdateChain } = require('../middlewares/validationMiddlewares/validationChains.js');
 const createQueryOptionMiddleware = require('../middlewares/queryOptionMiddleware/index.js');
 
+const { jwtAuthen } = require('../middlewares/authenMiddlewares.js');
+
 const { getSummary } = require('../controllers/summaryController.js');
 const { getPostsMetaData, createPost, updatePost, deletePost } = require('../controllers/postController.js');
 const { getComments, createComment, deleteCommentById } = require('../controllers/commentController.js');
@@ -19,21 +21,23 @@ const validatePostUpdate = createValidationMiddleware(postUpdateChain);
 
 const buildPostQueryOption = createQueryOptionMiddleware({ 
     title: (req) => req.query?.search, 
-    authorId: (req) => req.users.id,
+    authorId: (req) => req.user.id,
     status: (req) => req.query?.status && `exact:${req.query?.status}`
 });
 
 const buildCommentQueryOption = createQueryOptionMiddleware({ 
     content: (req) => req.query?.search, 
-    authorId: (req) => req.users.id
+    authorId: (req) => req.user.id
 });
 
-usersRouter.get('/posts', validatePostQueryParams, checkPermission, buildPostQueryOption, getPostsMetaData );
-usersRouter.post('/posts', (req,res,next) => {console.log('this'); next()}, checkPermission, createPost); //works but need to add validation
+usersRouter.use('/', jwtAuthen);
+
+usersRouter.get('/posts', validatePostQueryParams, checkPermission, buildPostQueryOption, getPostsMetaData ); 
+usersRouter.post('/posts', checkPermission, createPost); //need validation
 
 usersRouter.use(['/posts/:postId', '/posts/:postId/comments'], loadPost);
-usersRouter.post('/posts/:postId/comments', checkPermission, createComment); //works but need to add validation
-usersRouter.patch('/posts/:postId', validatePostUpdate, checkPermission, updatePost); 
+usersRouter.post('/posts/:postId/comments', checkPermission, createComment); //need validation
+usersRouter.patch('/posts/:postId', validatePostUpdate, checkPermission, updatePost);
 usersRouter.delete('/posts/:postId', checkPermission, deletePost);
 usersRouter.get('/posts/:postId', checkPermission, (req, res, next) => {
     return res.status(200).json({

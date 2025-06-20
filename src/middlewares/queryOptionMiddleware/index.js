@@ -1,8 +1,9 @@
 const QueryOptionBuilder = require('./QueryOptionBuilder.js');
-const { StringHandler, ExactStringFilterHandler,  DefaultFilterHandler } = require('./FilterHandler.js');
+const FilterHandler = require('./FilterHandler.js');
+const { variants } = require('./FilterHandler.js');
 
-const handlers = [new StringHandler(), new ExactStringFilterHandler(), new DefaultFilterHandler()];
-const queryOptionBuilder = new QueryOptionBuilder(handlers);
+variants.forEach(v => FilterHandler.register(v));
+const queryOptionBuilder = new QueryOptionBuilder(FilterHandler.getHandlers());
 
 function createQueryOptionMiddleware(defaultFilter) {
     const queryOptionMiddleware = queryOptionBuilder.createMiddleware(defaultFilter);

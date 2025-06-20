@@ -3,7 +3,6 @@ const path = require('node:path');
 const express = require('express');
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
-const { jwtAuthen } = require('./middlewares/authenMiddlewares.js');
 const authenRouter = require('./routes/authenRouter.js');
 const postRouter = require('./routes/postRouter.js');
 const usersRouter = require('./routes/usersRouter.js');
@@ -29,8 +28,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/authen', authenRouter);
-
-app.use(['/posts', '/users'], jwtAuthen);
 app.use('/posts', postRouter);
 app.use('/users', usersRouter);
 

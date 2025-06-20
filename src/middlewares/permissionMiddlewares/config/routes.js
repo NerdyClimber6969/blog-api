@@ -2,48 +2,23 @@ const { CREATE, READ, UPDATE, DELETE, LIST } = require('./actions');
 
 module.exports = [
     { 
-        route: '/posts', 
+        route: '/users/posts', 
         method: 'GET', 
         resource: 'posts', 
         action: LIST,
-        dataExtractor: req => req.data,
-        contextAttacher: (req, context) => context.view = 'public'
+        dataExtractor: req => req.data
     },
     { 
-        route: '/posts/:postId', 
-        method: 'GET', 
+        route: '/users/posts', 
+        method: 'POST', 
         resource: 'posts', 
-        action: READ,
-        dataExtractor: req => req.data,
-        contextAttacher: (req, context) => context.view = 'public'
-    },
-    {
-        route: '/posts/:postId/comments',
-        method: 'GET',
-        resource:'comments',
-        action: LIST,
-        dataExtractor: req => req.data,
-        contextAttacher: (req, context) => context.view = 'public'
+        action: CREATE,
+        dataExtractor: req => req.data
     },
     { 
         route: '/users/posts/:postId/comments', 
         method: 'POST', 
         resource: 'comments', 
-        action: CREATE,
-        dataExtractor: req => req.data
-    },
-    { 
-        route: '/users/posts', 
-        method: 'GET', 
-        resource: 'posts', 
-        action: LIST,
-        dataExtractor: req => req.data,
-        contextAttacher: (req, context) => context.view = 'profile'
-    },
-    { 
-        route: '/users/posts', 
-        method: 'POST', 
-        resource: 'posts', 
         action: CREATE,
         dataExtractor: req => req.data
     },
@@ -67,16 +42,14 @@ module.exports = [
         method: 'GET', 
         resource: 'posts', 
         action: READ,
-        dataExtractor: req => req.data ,
-        contextAttacher: (req, context) => context.view = 'profile'
+        dataExtractor: req => req.data
     },
     { 
         route: '/users/comments', 
         method: 'GET', 
         resource: 'comments', 
         action: LIST,
-        dataExtractor: req => req.data,
-        contextAttacher: (req, context) => context.view = 'profile'
+        dataExtractor: req => req.data
     },
     { 
         route: '/users/comments/:commentId', 
@@ -90,7 +63,6 @@ module.exports = [
         method: 'GET', 
         resource: 'summary', 
         action: READ,
-        dataExtractor: req => req.data,
-        contextAttacher: (req, context) => context.view = 'profile'
+        dataExtractor: req => req.data
     }
 ];

@@ -3,27 +3,32 @@
 * @class
 */
 class FilterHandler {
-    canHandle(key, value) {
+    static #handlers = [];
+
+    static register(handler) {
+        if (!(handler.prototype instanceof FilterHandler)) {
+            throw new TypeError('Handler must extend FilterHandler');
+        };
+
+        this.#handlers.push(handler);
+    };
+
+    static getHandlers() {
+        return FilterHandler.#handlers;
+    };
+
+    static canHandle(key, value) {
         throw new Error('Must implement canHandle');
     };
     
-    handle(key, value) {
+    static handle(key, value) {
         throw new Error('Must implement handle');
     };
 };
 
-class DefaultFilterHandler extends FilterHandler {
-    canHandle(key, value) {
-        return true; 
-    };
-    
-    handle(key, value) {
-        return { [key]: value };
-    };
-};
 
 class StringHandler extends FilterHandler {
-    _sanitizeValue (value) {
+    static _sanitizeValue (value) {
         if (typeof value === 'string') {
             return value.trim();
         };
@@ -31,25 +36,57 @@ class StringHandler extends FilterHandler {
         return value;
     };
 
-    canHandle(key, value) {
+    static canHandle(key, value) {
         return typeof value === 'string' && !value.startsWith('exact:');
     };
 
-    handle(key, value) {
+    static handle(key, value) {
         const sanitizedValue = this._sanitizeValue(value);
         return { [key]: { contains: sanitizedValue, mode: 'insensitive' } };
     };
 };
 
 class ExactStringFilterHandler extends StringHandler {
-    canHandle(key, value) {
+    static canHandle(key, value) {
         return typeof value === 'string' && value.startsWith('exact:');
     };
     
-    handle(key, value) {
+    static handle(key, value) {
         const sanitizedValue = this._sanitizeValue(value.replace('exact:', ''));
         return { [key]: sanitizedValue };
     };
 };
 
-module.exports = { StringHandler, ExactStringFilterHandler,  DefaultFilterHandler, FilterHandler };
+class RelationFilterHandler extends FilterHandler {
+    static canHandle(key, value) {
+        return typeof value === 'object' && value !== null && !Array.isArray(value);
+    };
+
+    static handle(key, value) {
+        const handlers = this.getHandlers();
+        const nestedWhere = {};
+
+        for (const [subKey, subValue] of Object.entries(value)) {
+            const handler = handlers.find(h => h.canHandle(subKey, subValue));
+            const processedFilter = handler.handle(subKey, subValue);
+            Object.assign(nestedWhere, processedFilter);
+        };
+
+        return { 
+            [key]: nestedWhere
+        };
+    };
+};
+
+class DefaultFilterHandler extends FilterHandler {
+    static canHandle(key, value) {
+        return true; 
+    };
+    
+    static handle(key, value) {
+        return { [key]: value };
+    };
+};
+
+module.exports = FilterHandler;
+module.exports.variants = [ StringHandler, ExactStringFilterHandler, RelationFilterHandler, DefaultFilterHandler ];
