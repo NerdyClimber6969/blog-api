@@ -20,10 +20,26 @@ const signUpChain = [
         .custom((value, { req }) => value === req.body.password).withMessage("passwords didn't matched, try again")
 ];
 
+const commentCreationChain = [
+    body('content').trim()
+        .exists({ values: 'falsy' }).withMessage('content must be provided and not be empty')
+        .isString().withMessage('content must be a string')
+];
+
+const postCreationChain = [
+    body('title').trim()
+        .exists({ values: 'falsy' }).withMessage('title must be provided and not be empty')
+        .isString().withMessage('title must be a string')
+];
+
 const postUpdateChain =  [
-    body('title').optional().trim(),
-    body('summary').optional().trim(),
-    body('content').optional().trim(),
+    body('title').optional().trim()
+        .notEmpty().withMessage('title must not be empty')
+        .isString().withMessage('title must be a string'),
+    body('summary').optional().trim()
+        .isString().withMessage('summary must be a string'),
+    body('content').optional().trim()
+        .isString().withMessage('content must be a string'),
     body('status').optional().trim().toLowerCase()
         .isString().withMessage('status must be a string')
         .isIn(['drafted', 'published', 'archived', 'banned']).withMessage('status can only be drafted, published, archived or banned'), 
@@ -68,4 +84,13 @@ const commentQueryChain = [
     ...profileCommentQueryChain
 ];
 
-module.exports = { signUpChain, postUpdateChain, postQueryChain, commentQueryChain, profilePostQueryChain, profileCommentQueryChain };
+module.exports = { 
+    signUpChain, 
+    postUpdateChain, 
+    postQueryChain, 
+    commentQueryChain, 
+    profilePostQueryChain, 
+    profileCommentQueryChain, 
+    commentCreationChain,
+    postCreationChain
+};

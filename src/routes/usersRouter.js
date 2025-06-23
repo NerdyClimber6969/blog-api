@@ -4,7 +4,7 @@ const { loadPost, loadComment } = require('../middlewares/loaderMiddlewares.js')
 const checkPermission = require('../middlewares/permissionMiddlewares/index.js');
 
 const { createValidationMiddleware } = require('../middlewares/validationMiddlewares/validationMiddlewares.js');
-const { profilePostQueryChain, profileCommentQueryChain, postUpdateChain } = require('../middlewares/validationMiddlewares/validationChains.js');
+const { profilePostQueryChain, profileCommentQueryChain, postUpdateChain, commentCreationChain, postCreationChain } = require('../middlewares/validationMiddlewares/validationChains.js');
 const createQueryOptionMiddleware = require('../middlewares/queryOptionMiddleware/index.js');
 
 const { jwtAuthen } = require('../middlewares/authenMiddlewares.js');
@@ -18,6 +18,8 @@ const usersRouter = Router();
 const validatePostQueryParams = createValidationMiddleware(profilePostQueryChain);
 const validateCommetnQueryParams = createValidationMiddleware(profileCommentQueryChain);
 const validatePostUpdate = createValidationMiddleware(postUpdateChain);
+const validateCommentCreation = createValidationMiddleware(commentCreationChain);
+const validatePostCreation = createValidationMiddleware(postCreationChain)
 
 const buildPostQueryOption = createQueryOptionMiddleware({ 
     title: (req) => req.query?.search, 
@@ -33,10 +35,10 @@ const buildCommentQueryOption = createQueryOptionMiddleware({
 usersRouter.use('/', jwtAuthen);
 
 usersRouter.get('/posts', validatePostQueryParams, checkPermission, buildPostQueryOption, getPostsMetaData ); 
-usersRouter.post('/posts', checkPermission, createPost); //need validation
+usersRouter.post('/posts', validatePostCreation, checkPermission, createPost);
 
 usersRouter.use(['/posts/:postId', '/posts/:postId/comments'], loadPost);
-usersRouter.post('/posts/:postId/comments', checkPermission, createComment); //need validation
+usersRouter.post('/posts/:postId/comments', validateCommentCreation, checkPermission, createComment);
 usersRouter.patch('/posts/:postId', validatePostUpdate, checkPermission, updatePost);
 usersRouter.delete('/posts/:postId', checkPermission, deletePost);
 usersRouter.get('/posts/:postId', checkPermission, (req, res, next) => {
