@@ -23,22 +23,23 @@ const login = [
     localAuthen,
     (req, res, next) => {
         const { id, username, role } = req.user;
-        const accessToken = AuthenService.generateToken(id, username, role, process.env.SECRET);
+        const { token, exp } = AuthenService.generateToken(id, username, role, process.env.SECRET);
 
         const cookieOption = {
             httpOnly: true,
             domain: process.env.COOKIE_DOMAIN || 'localhost',
             secure: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging',
             path: '/',
-            maxAge: 1000 * 60 * 60,
+            expires: new Date(exp),
         };
         (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging') && (cookieOption.sameSite = 'None');
 
-        res.cookie('accessToken', accessToken, cookieOption);
+        res.cookie('accessToken', token, cookieOption);
 
         return res.status(201).json({      
             success: true,
             username: username,
+            exp
         });
     }
 ];
@@ -81,6 +82,7 @@ function verifyStatus(req, res, next) {
         success: true,
         isAuthenticated: true,
         expired: false,
+        exp: accessToken.exp,
         username: accessToken.username
     });
 };

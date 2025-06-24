@@ -12,13 +12,14 @@ class AuthenService {
     };
 
     static generateToken(id, username, role, secretKey) {
+        const exp = Date.now() + (60 * 60 * 1000);
+
         const token = jwt.sign(
-            { id, username, role }, 
+            { id, username, role, exp }, 
             secretKey, 
-            { expiresIn: '1h' }
         );
 
-        return token;
+        return { token, exp };
     };
 };
 
