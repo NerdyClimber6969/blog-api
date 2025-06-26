@@ -19,7 +19,12 @@ class CommentService {
                         title: true,
                         author: { select: { username: true } }
                     }
-                },                    
+                },  
+                author: {
+                    select : {
+                        username: true
+                    }
+                }                      
             }
         });
 
@@ -39,7 +44,12 @@ class CommentService {
                             title: true,
                             author: { select: { username: true } }
                         }
-                    },                    
+                    }, 
+                    author: {
+                        select : {
+                            username: true
+                        }
+                    }                   
                 }
             })
         ]);
