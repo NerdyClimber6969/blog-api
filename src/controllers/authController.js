@@ -12,7 +12,7 @@ const register = [
     asyncHandler(async(req, res, next) => {
         const { id, username, role } = await UserService.createUser(req.body);
 
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             user: { id, username, role }
         });
@@ -27,7 +27,7 @@ const login = [
 
         const cookieOption = {
             httpOnly: true,
-            domain: process.env.COOKIE_DOMAIN || 'localhost',
+            domain: process.env.COOKIE_DOMAIN,
             secure: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging',
             path: '/',
             expires: new Date(exp),

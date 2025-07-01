@@ -13,8 +13,8 @@ const app = express();
 
 const corsOptions = {
     origin: [
-        process.env.BLOG_STUDIO_URL || 'http://localhost:3001', 
-        process.env.BLOG_APP_URL || 'http://localhost:3002',
+        process.env.BLOG_STUDIO_URL, 
+        process.env.BLOG_APP_URL,
     ],
     allowedHeaders: ['Content-Type', 'Authorization'],
     optionsSuccessStatus: 200,
