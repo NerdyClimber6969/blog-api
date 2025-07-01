@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "migrate dev": "npx prisma migrate dev",
-    "migrate dev:create": "npx prisma migrate dev --create-only",
-    "migrate deploy": "npx prisma migrate deploy",
+    "migrate:dev": "npx prisma migrate dev",
+    "migrate:dev:create": "npx prisma migrate dev --create-only",
+    "migrate:deploy": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
     "dev": "NODE_ENV=development node --watch src/app.js",
     "stage": "NODE_ENV=staging node src/app.js",
