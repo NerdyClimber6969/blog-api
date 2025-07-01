@@ -2,8 +2,8 @@
 A RESTful Blog API built with Node.js, Express.js and Prisma that provides  convenient and secure way to access and manage your blog's data. 
 
 This API have two related pages:
-- [**Blog App**](www.abc.com) -  for users to **read posts and leave comments**.
-- [**Blog Studio**](www.abc.com) - for users to **manage their posts and comments**.
+- [**Blog App**](https://github.com/NerdyClimber6969/blog-app) -  for users to **read posts and leave comments**.
+- [**Blog Studio**](https://github.com/NerdyClimber6969/blog-studio) - for users to **manage their posts and comments**.
 
 # Content
 - [Features](#features)
@@ -48,7 +48,7 @@ COOKIE_DOMAIN=<Domain for cookies>
 
 4. Run database migration
 ```
-npm run migrate deploy
+npm run migrate:deploy
 ```
 
 5. Start the server
@@ -121,8 +121,8 @@ Further Notes:
 
 ## Example of Request and Response
 ### User Registration
+**Request:**
 ```http
-# Request
 POST /authen/sign-up
 Content-Type: application/json
 
@@ -133,10 +133,11 @@ Content-Type: application/json
     "password": "johndoe123",
     "confirm": "johndoe123"
 }
+``` 
+**Success Response (201 Created):**
+```http
+Content-type: application/json
 
---------------------------------
-
-# Success Response (201 Created):
 {
     "success": true,
     "user": {
@@ -148,8 +149,8 @@ Content-Type: application/json
 ```
 
 ### User Login 
+**Request:**
 ```http
-# Request
 POST /authen/login
 Content-type: application/json
 
@@ -157,10 +158,9 @@ Content-type: application/json
     "username": "johndoe123",
     "password": "johndoe123",
 }
-
--------------------------------
-
-# Success Response (200 OK):
+```
+**Success Response (200 OK):**
+```http
 Content-type: application/json
 Set-cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Domain=blog.com; Path=/; Expires=Tue, 01 Jul 2025 08:42:16 GMT; HttpOnly; Secure; SameSite=None
 
@@ -172,17 +172,18 @@ Set-cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Domain=blog.com
 ```
 
 ### Get Post's Metadata
+**Request:**
 ```http
-# Request
 GET /users/posts
 Content-Type: application/json
 Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-----------------------------------
-
-# Success Response (200 OK):
+```
+**Success Response (200 OK):**
+```http
+Content-type: application/json
 {
     "success": true,
-    "total": 20,
+    "total": 1,
     "posts": [
         {
             "id": "c13c8dc1-e982-4123-bcdc-e3e569f829e4",
@@ -198,14 +199,13 @@ Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
                 "username": "johndoe123"
             }
         },
-        ...
     ]
 }
 ```
 
 ### Update Post 
-``` http
-# Request
+**Request**
+```http
 PATCH /users/posts/c13c8dc1-e982-4123-bcdc-e3e569f829e4
 Content-Type: application/json
 Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -216,10 +216,10 @@ Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     "content": "new post content"
     "status": "published",    
 }
-
------------------------------------
-
-# Success Response (200 OK):
+```
+**Success Response (200 OK):**
+```http
+Content-type: application/json
 {
     "success": true,
     "userId": "f2642032-7ff3-4199-8fdb-812f11fc0fd7",
@@ -257,8 +257,6 @@ The API implements its own error type with default HTTP status code:
         "details": {} 
     }
 }
-
-# details vary according to error type
 ```
 
 # Acknowledgments
