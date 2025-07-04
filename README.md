@@ -2,8 +2,8 @@
 A RESTful Blog API built with Node.js, Express.js and Prisma that provides convenient and secure way to access and manage your blog's data. 
 
 This API have two related repositories:
-- [**Blog App**](https://github.com/NerdyClimber6969/blog-app) - for users to **read posts and leave comments**.
-- [**Blog Studio**](https://github.com/NerdyClimber6969/blog-studio) - for users to **manage their posts and comments**.
+- [**Blog App**](https://github.com/nickyuencm117/blog-app) - for users to **read posts and leave comments**.
+- [**Blog Studio**](https://github.com/nickyuencm117/blog-studio) - for users to **manage their posts and comments**.
 
 # Table of Content
 - [Project Structure](#project-structure)
@@ -73,7 +73,7 @@ To access protected endpoints, clients must include the `accessToken` cookie in 
 # Getting Started
 1. Clone this repository
 ```
-git clone https://github.com/NerdyClimber6969/blog-api.git
+git clone https://github.com/nickyuencm117/blog-api.git
 cd blog-api
 ```
 
